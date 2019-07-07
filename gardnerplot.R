@@ -1,5 +1,4 @@
 # jess kant
-# jkant@bu.edu 2019
 
 vio<-read.csv("~/../Desktop/violations.csv",header=T)
 View(vio)
