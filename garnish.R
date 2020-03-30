@@ -6,30 +6,37 @@
 
 library(stringr)
 library(ggplot2)
+library(dplyr)
+library(lubridate)
 
 
 ds<-read.csv("~/../Do~/../Downloads/south bay/sheet.csv",
-             stringsAsFactors = FALSE, 
-             header = TRUE, 
-             check.names = FALSE)
+               stringsAsFactors = FALSE, 
+               header = TRUE, 
+               check.names = FALSE)
 
-ds<-ds[-which(nchar(colnames(ds))==1|nchar(colnames(ds))==2)]       # delete all cols 1-2 digits long
-ds<-ds[-which(substr(colnames(ds),1,1)==2&nchar(colnames(ds))==4)]  # remove dates (2xxx)
-i<-1                                                                # preserve code formatting
-for(n in length(colnames(ds))){
-  z<-colnames(ds)[x]
-  if(nchar(z)<8){
-    colnames(ds)[x]<-str_extract(z,"[[:digit:]]+\\.*[[:digit:]]*+")}
-  if(nchar(colnames(ds)[x])>7){
-    colnames(ds)[x]<-str_extract(z,"[[:digit:]]*+-[[:digit:]]+\\.*[[:digit:]]*+")}}
+  
+  ds<-ds[-which(nchar(colnames(ds))==1|nchar(colnames(ds))==2)]       # delete all cols 1-2 digits long
+  ds<-ds[-which(substr(colnames(ds),1,1)==2&nchar(colnames(ds))==4)]  # remove dates (2xxx)
+  ds$name<-tolower(ds$name)                                           # necessary for matching in fList vector
 
-# following code extracts dates from ds$name column
+# following code extracts dates from ds$name column and identifies facility 
+# indexValues() is for resetting matrices/index variables
 
+ice<-c(" ice "," i.c.e. ")
+cty<-c("couny jail","lockup","house of correction")
+fList<-c("mci norfolk","souza","worcester county", "norfolk county", "essex county", 
+           "cedar junction", "mci walpole", "treatment center", "northeastern correctional",
+           "north central", "bay state correctional", "dartmouth women", "dukes county",
+           "souza","south middlesex correction","mci concord", "plymouth county", "old colony",
+           "pondville","middlesex county","shirley","mci framingham", "mci plymouth",
+           "berkshire county","barnstable county","suffolk county", "boston pre-release",
+           "bridge water", "bridgewater","bristol county","hampden county", "boston pre release")
+ds$facility<-""
+ds$report_date<-""
+ds$facility_type<-""
 i<-1
-fList<-c("norfolk","souza","worcester county",
-         "souza","south middlesex","concord",
-         "pondville","middlesex county","shirley","mci framingham",
-         "berkshire county","barnstable county","suffolk county")
+
 for(n in ds$name){
   i<-as.numeric(i)
   if(str_detect(ds$name[i],",")==TRUE & (str_detect(ds$name[i],"[:digit:]+")==TRUE)){
@@ -50,28 +57,42 @@ for(n in ds$name){
   iNum<-1
   for(f in fList){
     if(str_detect(ds$name[i],fList[iNum])==TRUE){
-      ds$facility[i]<-fList[iNum]
-    }
-    iNum<-iNum+1
-  }
+      ds$facility[i]<-fList[iNum]}
+    iNum<-iNum+1}
   i<-i+1
 }
 
-ds %>% select(name, report_date)
-ds %>% select(name, facility)
+# identify facility type
 
-# ds$name[grep("Facility Inspection",ds$name)]<-substr(ds$name,30,nchar(ds$name))
+ds$facility_type[which(str_detect(ds$name,"ice|i.c.e")==TRUE)]<-"ice"      
+ds$facility_type[which(str_detect(ds$name,"jail|lockup|house of correction")==TRUE)]<-"jail"
+ds$facility_type[which(str_detect(ds$name,"mci|MCI|m.c.i.")==TRUE)]<-"prison"
 
 
+# import created_date data from junkfood.py into useable data
 
-# str_extract(colnames(ds)[x],"[[:digit:]]+\\.*[[:digit:]]*+")                # CMR format
-# str_extract(colnames(ds)[41],"[[:digit:]]*+-[[:digit:]]+\\.*[[:digit:]]*+") # FC format
+ds$new_date<-ds$date
+ds$new_date<-as.Date(ds$new_date,"%m/%d/%Y")
+
+sub<-ds %>% select(name, report_date, date, new_date, facility, facility_type)
+View(sub)
+
+grep("Facility Inspection", ds$name)
+
+
+# data dictionary 
+
+ds$ventilation<-ds$`451.14`
+ds$slop_sink<-ds$`451.13` # plumbing not maintained, slop sink
+
 
 vio<-vector()
 vio$yr<-format(as.Date(vio$date_report,"%d-%b-%y"),"%Y")
 vio<-read.csv("~/../Desktop/violations.csv",header=T)
 vio$date_report <- as.Date(vio$date_report,"%d-%b-%y")
 vio$total_current<-as.numeric(vio$total_current)
+
+as.Date(ds$date,"%d-%b-%y")
 
 vio<-read.csv("~/../Desktop/violations.csv",header=T)
 library(tidyverse)
