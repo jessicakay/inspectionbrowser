@@ -1,5 +1,9 @@
 
 # garnish.R
+# companion to junkfood.py 
+#
+# https://github.com/jessicakay/inspectionbrowser
+#
 # jkant@bu.edu
 
 # read file, load local variables
@@ -37,6 +41,7 @@ ds$report_date<-""
 ds$facility_type<-""
 i<-1
 
+
 for(n in ds$name){
   i<-as.numeric(i)
   if(str_detect(ds$name[i],",")==TRUE & (str_detect(ds$name[i],"[:digit:]+")==TRUE)){
@@ -65,9 +70,9 @@ for(n in ds$name){
 # identify facility type
 
 ds$facility_type[which(str_detect(ds$name,"ice|i.c.e")==TRUE)]<-"ice"      
-ds$facility_type[which(str_detect(ds$name,"jail|lockup|house of correction")==TRUE)]<-"jail"
+ds$facility_type[which(str_detect(ds$name,"jail|lockup|house of correction|county")==TRUE)]<-"jail"
 ds$facility_type[which(str_detect(ds$name,"mci|MCI|m.c.i.")==TRUE)]<-"prison"
-
+ds$facility_type[which(str_detect(ds$name,"substance|treatment|rehab|rehabilitation")==TRUE)]<-"substance"
 
 # import created_date data from junkfood.py into useable data
 
@@ -85,18 +90,17 @@ grep("Facility Inspection", ds$name)
 ds$ventilation<-ds$`451.14`
 ds$slop_sink<-ds$`451.13` # plumbing not maintained, slop sink
 
+# facilities: this function isolates out a specific facility and graphs the total violations
 
-vio<-vector()
-vio$yr<-format(as.Date(vio$date_report,"%d-%b-%y"),"%Y")
-vio<-read.csv("~/../Desktop/violations.csv",header=T)
-vio$date_report <- as.Date(vio$date_report,"%d-%b-%y")
-vio$total_current<-as.numeric(vio$total_current)
+dataSource<-function(location){
+  library
+  fac<<-ds %>% filter(facility==location)
+  vio<<-fac
+  }
 
-as.Date(ds$date,"%d-%b-%y")
+dataSource("mci norfolk")
 
-vio<-read.csv("~/../Desktop/violations.csv",header=T)
-library(tidyverse)
-vioPlot<-function()
+vioPlot<-function(facility)
 {
   ggplot(vio,aes(date_report,total_current))+
     labs(fill="violations")+
