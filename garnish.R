@@ -13,13 +13,11 @@ library(ggplot2)
 library(dplyr)
 library(lubridate)
 
-
 ds<-read.csv("~/../Do~/../Downloads/south bay/sheet.csv",
-               stringsAsFactors = FALSE, 
-               header = TRUE, 
-               check.names = FALSE)
+                stringsAsFactors = FALSE, 
+                header = TRUE, 
+                check.names = FALSE)
 
-  
   ds<-ds[-which(nchar(colnames(ds))==1|nchar(colnames(ds))==2)]       # delete all cols 1-2 digits long
   ds<-ds[-which(substr(colnames(ds),1,1)==2&nchar(colnames(ds))==4)]  # remove dates (2xxx)
   ds$name<-tolower(ds$name)                                           # necessary for matching in fList vector
@@ -29,7 +27,7 @@ ds<-read.csv("~/../Do~/../Downloads/south bay/sheet.csv",
 
 ice<-c(" ice "," i.c.e. ")
 cty<-c("couny jail","lockup","house of correction")
-fList<-c("mci norfolk","souza","worcester county", "norfolk county", "essex county", 
+fList<-c("mci norfolk","souza","worcester county", "norfolk county", "essex county", "dartmouth",
            "cedar junction", "mci walpole", "treatment center", "northeastern correctional",
            "north central", "bay state correctional", "dartmouth women", "dukes county",
            "souza","south middlesex correction","mci concord", "plymouth county", "old colony",
@@ -68,54 +66,61 @@ for(n in ds$name){
 }
 
 # identify facility type
+ds$facility_type<-""
 
-ds$facility_type[which(str_detect(ds$name,"ice|i.c.e")==TRUE)]<-"ice"      
 ds$facility_type[which(str_detect(ds$name,"jail|lockup|house of correction|county")==TRUE)]<-"jail"
 ds$facility_type[which(str_detect(ds$name,"mci|MCI|m.c.i.")==TRUE)]<-"prison"
 ds$facility_type[which(str_detect(ds$name,"substance|treatment|rehab|rehabilitation")==TRUE)]<-"substance"
+ds$facility_type[which(str_detect(ds$name,"i\\.c\\.e")==TRUE)]<-"ice"
 
 # import created_date data from junkfood.py into useable data
 
 ds$new_date<-ds$date
 ds$new_date<-as.Date(ds$new_date,"%m/%d/%Y")
 
-sub<-ds %>% select(name, report_date, date, new_date, facility, facility_type)
-View(sub)
+a<-1;for(i in colnames(ds)){print(noquote(paste(" ",a," - ",i))) ; a<-a+1}
 
-grep("Facility Inspection", ds$name)
+ds<-ds[-c(1:3)]
+toMove<-ds[1]                  # crude column cleaning, necessary for rowsum
+ds<-ds[-1]
+ds[length(ds)+1]<-toMove
 
+ds$cmr_total<-rowSums(ds[which(str_detect(colnames(ds),"[:digit:]+\\.[:digit:]+"))],na.rm = TRUE)
+ds$fc_total<-rowSums(ds[which(str_detect(colnames(ds),"[:digit:]+\\-[:digit:]+.[:digit:]+"))],na.rm = TRUE)
+
+sub<-ds %>% select(name, report_date, date, new_date, facility, facility_type,cmr_total,fc_total)
 
 # data dictionary 
 
-ds$ventilation<-ds$`451.14`
-ds$slop_sink<-ds$`451.13` # plumbing not maintained, slop sink
+          ds$ventilation<-ds$`451.14`
+          ds$slop_sink<-ds$`451.13` # plumbing not maintained, slop sink
 
 # facilities: this function isolates out a specific facility and graphs the total violations
 
 dataSource<-function(location){
   library
-  fac<<-ds %>% filter(facility==location)
+  fac<<-sub %>% filter(facility==location)
   vio<<-fac
   }
 
-dataSource("mci norfolk")
+dataSource("mci framingham")
 
-vioPlot<-function(facility)
-{
-  ggplot(vio,aes(date_report,total_current))+
+vioPlot<-function(fac_name){
+    fac_name<-paste("Code violations DPH, ",fac_name)
+    ggplot(vio,aes(new_date,total_current))+
     labs(fill="violations")+
-    geom_point(aes(y=repeat_violations,colour="repeat"),size=2)+
-    geom_point(aes(y=total_current,colour="total"),size=2)+
+    geom_point(aes(y=fc_total,colour="FC"),size=2)+
+    geom_point(aes(y=cmr_total,colour="CMR"),size=2)+
     scale_color_discrete(name="violations")+
-    scale_x_date(date_labels = "%m/%y",breaks=vio$date_report)+
+    scale_x_date(date_labels = "%m/%y",breaks = vio$new_date)+
     ylab("number of violations")+
     xlab("date of inspection")+
-    ggtitle(label = "Code violations DPH NCCI Gardner")+
+    ggtitle(label = fac_name)+
+    theme_grey()+
     theme(panel.grid.minor = element_blank())
 }
 
-vioPlot()
 png(filename = '~/../Desktop/violations.png', 
     width= 800, height=500)
-vioPlot()
+vioPlot("MCI Framingham")
 dev.off()
