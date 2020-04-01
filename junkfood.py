@@ -3,10 +3,11 @@ import csv
 import re
 import docx
 import pandas
+import textract
 
 def gettext(report_files,sel):
     global logCSV, alltext
-    global r
+    global r, fileName
     global asteriskCount
     if sel=='a':
         print("loading...",prt)
@@ -42,8 +43,8 @@ def getColHead(fullPath,alltext):
     title  = report.core_properties.title
     print("the default header is ", title)
     print("the create data is: ", str(report.core_properties.created))
-    thename=input("use this? ")
-    if thename == "y":
+    thename=input("use this title? ")
+    if thename == "y" or thename=="":
         title=re.sub(r"\s", "_", title)
         titleHead=[]
         for character in title:
@@ -100,6 +101,7 @@ def allports(report_files):
 
 def writeSheet(head,fullPath,alltext):
     global styledata, data
+    global fullName
     global freq
     global report_name, create_date
     data=[]
@@ -108,6 +110,12 @@ def writeSheet(head,fullPath,alltext):
     document = docx.Document(styledata)
     core_properties = document.core_properties
     create_date = str(core_properties.created)
+    print("-> ",create_date)
+    useDate=input("use this date?")
+    if "n" in useDate:
+        print("filename is: ",fileName)
+        useDate=input("date override: ")
+        create_date=str(useDate)
     report_name = str(core_properties.title)
     data=pandas.read_csv(logCSV,error_bad_lines=False)
     numCols=len(data.columns)

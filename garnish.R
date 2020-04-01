@@ -21,10 +21,21 @@ ds<-read.csv("~/../Do~/../Downloads/south bay/sheet.csv",
   ds<-ds[-which(nchar(colnames(ds))==1|nchar(colnames(ds))==2)]       # delete all cols 1-2 digits long
   ds<-ds[-which(substr(colnames(ds),1,1)==2&nchar(colnames(ds))==4)]  # remove dates (2xxx)
   ds$name<-tolower(ds$name)                                           # necessary for matching in fList vector
-
+  colnames(ds)
+  toMove<-ds[1]                  # crude column cleaning, necessary for rowsum
+  ds<-ds[-1]
+  ds[length(ds)+1]<-toMove
+  
 # following code extracts dates from ds$name column and identifies facility 
 # indexValues() is for resetting matrices/index variables
 
+  
+ds$cmr_total<-rowSums(ds[which(str_detect(colnames(ds),"[:digit:]+\\.[:digit:]+"))],na.rm = TRUE)
+ds$fc_total<-rowSums(ds[which(str_detect(colnames(ds),"[:digit:]+\\-[:digit:]+.[:digit:]+"))],na.rm = TRUE)
+ds$total_violations<-ds$fc_total+ds$cmr_total
+ds$repeat_string<-str_extract(ds$repeat_string,"[:digit:]+")
+ds$repeat_string<-as.numeric(ds$repeat_string)
+  
 ice<-c(" ice "," i.c.e. ")
 cty<-c("couny jail","lockup","house of correction")
 fList<-c("mci norfolk","souza","worcester county", "norfolk county", "essex county", "dartmouth",
@@ -40,6 +51,7 @@ ds$facility_type<-""
 i<-1
 
 
+ds$name<-gsub("_"," ",ds$name)
 for(n in ds$name){
   i<-as.numeric(i)
   if(str_detect(ds$name[i],",")==TRUE & (str_detect(ds$name[i],"[:digit:]+")==TRUE)){
@@ -60,8 +72,10 @@ for(n in ds$name){
   iNum<-1
   for(f in fList){
     if(str_detect(ds$name[i],fList[iNum])==TRUE){
-      ds$facility[i]<-fList[iNum]}
-    iNum<-iNum+1}
+      ds$facility[i]<-fList[iNum]
+      }
+    iNum<-iNum+1
+    }
   i<-i+1
 }
 
@@ -78,17 +92,8 @@ ds$facility_type[which(str_detect(ds$name,"i\\.c\\.e")==TRUE)]<-"ice"
 ds$new_date<-ds$date
 ds$new_date<-as.Date(ds$new_date,"%m/%d/%Y")
 
-a<-1;for(i in colnames(ds)){print(noquote(paste(" ",a," - ",i))) ; a<-a+1}
 
-ds<-ds[-c(1:3)]
-toMove<-ds[1]                  # crude column cleaning, necessary for rowsum
-ds<-ds[-1]
-ds[length(ds)+1]<-toMove
-
-ds$cmr_total<-rowSums(ds[which(str_detect(colnames(ds),"[:digit:]+\\.[:digit:]+"))],na.rm = TRUE)
-ds$fc_total<-rowSums(ds[which(str_detect(colnames(ds),"[:digit:]+\\-[:digit:]+.[:digit:]+"))],na.rm = TRUE)
-
-sub<-ds %>% select(name, report_date, date, new_date, facility, facility_type,cmr_total,fc_total)
+sub<-ds %>% select(name, date, new_date, facility, facility_type,cmr_total,fc_total, total_violations, repeat_string, report_date)
 
 # data dictionary 
 
@@ -104,6 +109,8 @@ dataSource<-function(location){
   }
 
 dataSource("mci framingham")
+
+# basic plot 
 
 vioPlot<-function(fac_name){
     fac_name<-paste("Code violations DPH, ",fac_name)
@@ -124,3 +131,24 @@ png(filename = '~/../Desktop/violations.png',
     width= 800, height=500)
 vioPlot("MCI Framingham")
 dev.off()
+
+# new plot with total and repeat
+
+vioPlot2<-function(fac_name){
+  fac_name<-paste("Code violations DPH, ",fac_name)
+  ggplot(vio,aes(new_date,total_current))+
+    labs(fill="violations")+
+    geom_line(aes(y=total_violations,colour="Total cited"),size=1)+
+    geom_line(aes(y=repeat_string,colour="repeat violations"),size=1)+
+    geom_line(aes(y=fc_total,colour="FDA (Food Code)"),size=1)+
+    geom_line(aes(y=cmr_total,colour="CMR (MA state)"),size=1)+
+    scale_color_discrete(name="violations")+
+    scale_x_date(date_labels = "%m/%y",breaks = vio$new_date)+
+    ylab("number of violations")+
+    xlab("date of inspection")+
+    ggtitle(label = fac_name)+
+    theme_grey()+
+    theme(panel.grid.minor = element_blank())
+}
+
+vioPlot2("MCI Framingham")
