@@ -3,12 +3,14 @@ import csv
 import re
 import docx
 import pandas
+import numpy
 import textract
 
 def gettext(report_files,sel):
     global logCSV, alltext
     global r, fileName
     global asteriskCount
+    global totalPop, pop
     if sel=='a':
         print("loading...",prt)
         fileName = prt
@@ -17,19 +19,35 @@ def gettext(report_files,sel):
     fullPath = ''.join([filePath, fileName])
     doc = []
     repeatViolations=[]
+    totalPop=[]
     report = docx.Document(fullPath)
     for paragraph in report.paragraphs:
         doc.append(paragraph.text)
         rp=re.search(r'[0-9]+\srepeat', str(paragraph.text))
+        pp=re.search(r'population\sat\sthis\stime\swas\s[0-9]+', str(paragraph.text))
+        p1=re.search(r'population\swas\s[0-9]+', str(paragraph.text))
         if rp != None:
             repeatViolations.append(str(paragraph.text))
+        if pp !=None or p1 != None:
+            totalPop.append(str(paragraph.text))
+        elif pp==None and p1==None:
+            totalPop.append("")
+
+
     strongs = re.findall(r'[0-9.-]+', str(doc))
+    pop=re.findall(r'[0-9]+',str(totalPop))
+    if pop == None:
+        pop="Not found"
+    pop=''.join(pop)
+    print("pop #:",pop)
+
     asteriskCount = re.findall(r'\*', str(doc))
     r=re.findall(r'[0-9]+\srepeat\sviolations', str(repeatViolations))
     r=''.join(r)
     print(str(len(str(strongs))) + " strings evaluated")
     print("asterisks: "+str(len(asteriskCount)))
     print(str(r))
+
     logCSV = ''.join([filePath, "codearchive.csv"])
     alltext = []
     for strn in strongs:
@@ -105,7 +123,7 @@ def writeSheet(head,fullPath,alltext):
     global freq
     global report_name, create_date
     data=[]
-    print("writesheet using: ", head)
+    print("writesheet using: ", fileName)
     styledata = open(fullPath, 'rb')
     document = docx.Document(styledata)
     core_properties = document.core_properties
@@ -138,8 +156,14 @@ def writeSheet(head,fullPath,alltext):
 def buildDB(head):
     freqT = pandas.DataFrame.transpose(freq)
     freqT.insert(1,"name",head)
+    freqT.insert(1,"filename",str(fileName))
+    print("pop = ",str(pop))
+    if pop.isnumeric()==True:
+        freqT.insert(1,"total_pop",int(pop))
     freqT.insert(1,"date",create_date)
     freqT.insert(1,"repeat_string",r)
+    astc=int(str(len(asteriskCount)))
+    freqT.insert(1,"ast_cnt",astc)
     print("\nfreq table extracted:\t\n", freqT)
     newSheet = ''.join([home,"/Downloads/South Bay/","sheet.csv"])
     ns_exists=os.path.exists(newSheet)
