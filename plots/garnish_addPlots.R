@@ -77,24 +77,26 @@ lineChart<-function(){
 
   library(reshape2)
 
-  
-  s <-sub %>% 
-    filter(facility=="mci framingham"| facility=="cedar junction"|facility=="mci concord")
-  
-    melted<-s %>%
-      select(year, new_date, total_violations, repeat_string, facility)
-      s<-melt(melted,id=c("facility","year"))
-    
-      
-    s %>% 
-      filter(year>2014) %>%
-      ggplot(aes(x=year,y=total_violations,fill=facility))+
-        geom_bar(stat="identity",width = 60,position = "dodge")+
-        scale_color_discrete(name="violations")+
-        ylab("number of violations")+
-        xlab("year of inspection")
 
-
+s<-ds %>%
+  select(year, new_date, total_violations, repeat_string, facility) %>%
+  filter(facility=="mci framingham") %>%
+  filter(year>2014) %>%
+  melt(melted, id.vars = c("new_date","facility"), 
+       measure.vars =c("total_violations","repeat_string"),
+       variable.name = "newORold") %>%
+  arrange(new_date)
+  s$new_date<-as.Date(s$new_date)
+  ggplot(data=s,aes(x=new_date,y=value,fill=newORold))+
+  geom_bar(stat="identity",position = "stack")+
+  scale_color_discrete(name="violations")+
+  ylab("number of violations")+
+  xlab("Date of report")+
+  labs(title="MCI Framingham Total and Repeat Violations",
+       subtitle = "Source: DPH Inspections, 2015-2020",
+       caption = "jkant@bu.edu", fill="Type")+
+  scale_fill_discrete(name="Type", labels=c("Total","Repeat"))+
+  scale_x_date(date_labels = "%m/%y", breaks = s$new_date)
 
 
 
@@ -131,16 +133,14 @@ dev.off()
 
 
 
+write.csv(ds,"~/../Desktop/cleaned_04022020.csv")
 
 # mapping jails
-
-png(filename = '~/../Desktop/violations.png', 
-    width= 800, height=500)
 
 ds %>% 
   select(new_date,year,total_violations,facility, facility_type) %>%
   filter(facility_type=="jail") %>%
-  filter(facility!="") %>%
+  filter(facility != "") %>%
   arrange(year) %>%
   ggplot(aes(x=new_date,y=total_violations))+
   geom_point(mapping=aes(x=new_date,y=total_violations,color=facility))+
@@ -149,5 +149,24 @@ ds %>%
   labs(title="Total health inspection violations, Massachusetts Jails",
        subtitle = "Massachusetts DPH Reports, 2010-2020",caption="jkant@bu.edu")+
   scale_color_brewer(palette = "Spectral")
+
+# jails v. prisons 2015-present
+
+png(filename = '~/../Desktop/violations.png', 
+    width= 800, height=500)
+
+ds %>% 
+  select(new_date, year, total_violations, facility, facility_type) %>%
+  filter(facility_type=="jail" | facility_type=="prison") %>%
+  filter(year>2014) %>%
+  filter(facility!="") %>%
+  arrange(year) %>%
+  ggplot(aes(x=new_date,y=total_violations))+
+  geom_point(mapping=aes(x=new_date,y=total_violations,color=facility_type))+
+  ylab("number of violations")+
+  xlab("year of inspection")+
+  labs(title="Health inspection violations, Massachusetts Jails and Prisons",
+       subtitle = "Massachusetts DPH Reports, 2015-2020",caption="jkant@bu.edu",colour="Facility Type")+
+  scale_color_brewer(palette = "Set1")
 
 dev.off()
