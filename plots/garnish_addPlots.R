@@ -99,7 +99,6 @@ s<-ds %>%
   scale_x_date(date_labels = "%m/%y", breaks = s$new_date)
 
 
-
 # box and whisker plot comparing 4 facilities
 
 png(filename = '~/../Desktop/violations.png', 
@@ -117,6 +116,7 @@ s<-sub %>%
     labs(title="Variance in total violations, 2010-2020",
          subtitle = "Department of Public Health inspections of MDOC Facilities",
          caption = "jkant@bu.edu")
+
   
   dev.off()
   
@@ -168,5 +168,35 @@ ds %>%
   labs(title="Health inspection violations, Massachusetts Jails and Prisons",
        subtitle = "Massachusetts DPH Reports, 2015-2020",caption="jkant@bu.edu",colour="Facility Type")+
   scale_color_brewer(palette = "Set1")
+
+dev.off()
+
+fham <- ds %>% filter(facility=="mci framingham") 
+
+plot(glm(fham$repeat_string~fham$total_pop))
+
+# base-R pop vs. violations
+
+popVvio<-ds$total_pop~ds$total_violations
+plot(popVvio)
+abline(lm(popVvio))
+ggplot(ds,total_pop~total_violations)
+
+# relationship of violations to prison population, linear regression
+
+plot(lm(ds$total_pop~ds$total_violations+ds$facility))
+
+png(filename = '~/../Desktop/violations.png', 
+    width= 800, height=500)
+ds %>%
+  ggplot(aes(total_pop,total_violations))+
+  geom_point()+
+  geom_smooth(method="lm")+
+  xlab("Facility census (population)")+
+  ylab("number of violations")+
+  labs(title="Health inspection violations, Jails & Prisons",
+       subtitle = "Simple linear regression, all facilities, 2010-2020",
+       caption="jkant@bu.edu",
+       colour="Facility Type")
 
 dev.off()
