@@ -9,11 +9,13 @@ inspectionbrowser is made up of two components, Junkfood (document analysis, dat
 
  inspectionbrowser uses the following third-party libraries:
  
- * Python: docx-reader, pandas
+ * Python: docx-reader, pandas, numpy, textract, exiftool
  
- * R: ggplot2, dplyr, stringr, lubridate
+ * R: ggplot2, dplyr, stringr, lubridate, reshape2
  
  * Bash & Python: scraper
+ 
+A special thanks is also due to Tabula [ https://github.com/tabulapdf ] for making baseline data so easy to extract from DOC records. <3
  
 Background: https://www.publichealthpost.org/research/prisoners-health-is-public-health/
 
