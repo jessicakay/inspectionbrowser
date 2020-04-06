@@ -1,23 +1,23 @@
-MCI-Cedar Junction,,555
-SBCC,,1024
-Massachusetts Treatment Center,,561
-MCI-Cedar Junction,,78
-MCI-Concord,,614
-MCI-Framingham,,452
-MCI-Norfolk,,1084
-MCI-Shirley,,720
-NCCI-Gardner,,568
-OCCC,,480
-Shattuck Correctional Unit,,24
-State Hospital @ Bridgewater,,227
-MASPLY,,151
-MCI-Shirley,,299
-NCCI-Gardner,,30
-OCCC,,100
-Boston Pre-Release Center,,150
-NECC,,150
-Pondville Correctional Center,,100
-SMCC,,125
+MCI-Cedar Junction-Max,Maximum,555
+SBCC-Max,Maximum,1024
+Massachusetts Treatment Center,Medium,561
+MCI-Cedar Junction-Medium,Medium,78
+MCI-Concord-Medium,Medium,614
+MCI-Framingham,Medium,452
+MCI-Norfolk,Medium,1084
+MCI-Shirley-Medium,Medium,720
+NCCI-Gardner-Medium,Medium,568
+OCCC-Medium,Medium,480
+Shattuck Correctional Unit,Medium,24
+State Hospital @ Bridgewater,Medium,227
+MASPLY,Minimum,151
+MCI-Shirley-Min,Minimum,299
+NCCI-Gardner-Minimun,Minimum,30
+OCCC-Minimum,Minimum,100
+Boston Pre-Release Center,Minimum,150
+NECC,Minimum,150
+Pondville Correctional Center,Minimum,100
+SMCC,Minimum,125
 Bristol Ash Street,,206
 Bristol Dartmouth,,304
 Bristol Women’s Center,,56
