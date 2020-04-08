@@ -200,3 +200,53 @@ ds %>%
        colour="Facility Type")
 
 dev.off()
+
+
+
+
+s<-ds %>%
+  select(year, new_date, total_violations, repeat_string, facility, facility_type, filename, total_pop, capacity, over_cap) %>%
+  filter(facility_type=="prison") %>%
+  filter(year==2019) %>%
+  melt(melted, id.vars = c("facility", "filename"), 
+       measure.vars =c("total_pop","capacity"),
+       variable.name = "newORold")
+ggplot(data=s,aes(x=toupper(facility),y=value,fill=newORold))+
+  geom_bar(stat="identity",position = "dodge")+
+  ylab("# of people in facility")+
+  xlab("Facility")+
+  scale_fill_discrete(name="Type", labels=c("Total","Capacity"))+
+  labs(title="Population vs. Max Capacity",
+       subtitle = "Source: DPH Inspections, 2019",
+       caption = "deeperthwnater.org", fill="Type")
+
+
+
+######
+
+
+
+
+s<-ds %>%
+  select(year, new_date, total_violations, repeat_string, facility, facility_type, filename, total_pop, capacity, over_cap) %>%
+  filter(facility_type=="prison") %>%
+  filter(facility!="north central") %>%
+  filter(year %in% c(2018,2019) ) %>%
+  melt(melted, id.vars = c("facility", "filename","year"), 
+       measure.vars =c("total_pop","capacity"),
+       variable.name = "newORold")
+
+png(filename = '~/../Desktop/population.png', 
+    width= 800, height=500)
+ggplot(data=s,aes(x=toupper(facility),y=value,fill=newORold))+
+  geom_bar(stat="identity",position = "dodge")+
+  ylab("# of people in facility")+
+  xlab("Facility")+
+  scale_fill_discrete(name="Type", labels=c("Total","Capacity"))+
+  labs(title="Population vs. Max Capacity",
+       subtitle = "Source: DPH Inspections, 2019",
+       caption = "jkant@bu.edu", fill="Type")+
+  facet_grid(year~.)
+dev.off()
+
+arrange(s,facility)
