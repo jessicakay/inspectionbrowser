@@ -236,17 +236,39 @@ s<-ds %>%
        measure.vars =c("total_pop","capacity"),
        variable.name = "newORold")
 
+s$newORold<-factor(s$newORold,levels=c("capacity","total_pop"))
+
 png(filename = '~/../Desktop/population.png', 
     width= 800, height=500)
+
 ggplot(data=s,aes(x=toupper(facility),y=value,fill=newORold))+
   geom_bar(stat="identity",position = "dodge")+
   ylab("# of people in facility")+
   xlab("Facility")+
-  scale_fill_discrete(name="Type", labels=c("Total","Capacity"))+
+  scale_fill_discrete(name="", labels=c("Capacity","Actual"))+
   labs(title="Population vs. Max Capacity",
        subtitle = "Source: DPH Inspections, 2019",
-       caption = "jkant@bu.edu", fill="Type")+
+       caption = "deeperthanwater.org", fill="Type")+
   facet_grid(year~.)
+
 dev.off()
 
 arrange(s,facility)
+
+# population by total violations
+
+ds %>% 
+  select(new_date, year, total_violations, facility, facility_type, total_pop, capacity) %>%
+  filter(facility_type=="jail" | facility_type=="prison") %>%
+  filter(year>2014) %>%
+  filter(facility!="") %>%
+  arrange(year) %>%
+  ggplot(aes(total_pop,total_violations))+
+  geom_point()+
+  geom_smooth(method="lm")+
+  ylab("number of violations")+
+  xlab("Facility census at inspection")+
+  labs(title="Simple linear regression, relationship of populaiton to code violations",
+       subtitle = "Massachusetts DPH Reports, 2010-2020",caption="jkant@bu.edu",colour="Facility Type")+
+  scale_color_brewer(palette = "Set1")+
+  facet_grid(.~facility_type)
