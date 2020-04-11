@@ -272,3 +272,25 @@ ds %>%
        subtitle = "Massachusetts DPH Reports, 2010-2020",caption="jkant@bu.edu",colour="Facility Type")+
   scale_color_brewer(palette = "Set1")+
   facet_grid(.~facility_type)
+
+
+
+# percent over capacity
+
+
+s<-ds %>%
+  filter(facility_type=="prison") %>%
+  filter(facility!="north central" & facility!="shirley")
+
+s$facility<-with(s, reorder(facility, as.numeric(perc_overcap)))
+ggplot(data=s, aes(x=toupper(facility),y=as.numeric(perc_overcap)))+
+  geom_hline(yintercept = 0, linetype="dashed",color="darkgrey")+
+  stat_boxplot(geom="errorbar",width=0.3)+
+  geom_boxplot(aes(), alpha=0.6)+
+  coord_flip()+
+  xlab("Facility | note: data still being added")+
+  ylab("% over maximum rated capacity")+
+  labs(title="Percentage over maximum capacity, 2010-2020",
+       subtitle = "Department of Public Health inspections of MDOC Facilities",
+       caption = "jkant@bu.edu")
+
