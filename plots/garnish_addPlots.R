@@ -277,8 +277,8 @@ ds %>%
 
 # percent over capacity
 
-
 s<-ds %>%
+  select(filename, facility, total_pop, capacity, perc_overcap, new_date, year, facility_type, name) %>%
   filter(facility_type=="prison") %>%
   filter(facility!="north central" & facility!="shirley")
 
@@ -291,6 +291,35 @@ ggplot(data=s, aes(x=toupper(facility),y=as.numeric(perc_overcap)))+
   xlab("Facility | note: data still being added")+
   ylab("% over maximum rated capacity")+
   labs(title="Percentage over maximum capacity, 2010-2020",
+       subtitle = "Department of Public Health inspections of MDOC Facilities",
+       caption = "jkant@bu.edu")
+
+
+# zoomed in % over capacity
+
+
+s<-ds %>%
+  select(filename, facility, total_pop, capacity, perc_overcap, new_date, year, facility_type, name) %>%
+  filter(facility_type=="prison") %>%
+  filter(facility!="north central" & facility!="shirley") %>%
+  filter(year>2017)
+
+s$under<-ifelse(s$perc_overcap<0,1,0)
+
+s<-s %>%
+  group_by(facility) %>%
+  mutate(mean_over = mean(as.numeric(perc_overcap)))
+
+s$facility<-with(s, reorder(facility, as.numeric(perc_overcap)))
+s$mean_over<-paste(round(s$mean_over,2),"%")
+ggplot(data=s, aes(x=toupper(facility),y=as.numeric(perc_overcap)))+
+  geom_text(size=1, aes(label=mean_over, y=70), check_overlap = TRUE)+
+  geom_hline(yintercept = 0, linetype="dashed",color="darkgrey")+
+  geom_bar(stat="identity", alpha=0.6, width=0.5, aes(fill=factor(under)),position = position_dodge())+
+  coord_flip()+
+  xlab("Facility")+
+  ylab("% over maximum rated capacity")+
+  labs(title="Percentage over maximum capacity, 2018-2020",
        subtitle = "Department of Public Health inspections of MDOC Facilities",
        caption = "jkant@bu.edu")
 
