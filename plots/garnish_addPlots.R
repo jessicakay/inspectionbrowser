@@ -202,8 +202,6 @@ ds %>%
 dev.off()
 
 
-
-
 s<-ds %>%
   select(year, new_date, total_violations, repeat_string, facility, facility_type, filename, total_pop, capacity, over_cap) %>%
   filter(facility_type=="prison") %>%
@@ -220,12 +218,7 @@ ggplot(data=s,aes(x=toupper(facility),y=value,fill=newORold))+
        subtitle = "Source: DPH Inspections, 2019",
        caption = "deeperthwnater.org", fill="Type")
 
-
-
 ######
-
-
-
 
 s<-ds %>%
   select(year, new_date, total_violations, repeat_string, facility, facility_type, filename, total_pop, capacity, over_cap) %>%
@@ -280,7 +273,6 @@ ds %>%
 s<-ds %>%
   select(filename, facility, total_pop, capacity, perc_overcap, new_date, year, facility_type, name) %>%
   filter(facility_type=="prison") %>%
-  filter(facility!="north central" & facility!="shirley")
 
 s$facility<-with(s, reorder(facility, as.numeric(perc_overcap)))
 ggplot(data=s, aes(x=toupper(facility),y=as.numeric(perc_overcap)))+
@@ -297,25 +289,22 @@ ggplot(data=s, aes(x=toupper(facility),y=as.numeric(perc_overcap)))+
 
 # zoomed in % over capacity
 
+# filter(facility!="north central" & facility!="shirley") %>%
 
 s<-ds %>%
   select(filename, facility, total_pop, capacity, perc_overcap, new_date, year, facility_type, name) %>%
   filter(facility_type=="prison") %>%
-  filter(facility!="north central" & facility!="shirley") %>%
   filter(year>2017)
-
 s$under<-ifelse(s$perc_overcap<0,1,0)
-
-s<-s %>%
-  group_by(facility) %>%
-  mutate(mean_over = mean(as.numeric(perc_overcap)))
-
+s<-s %>% group_by(facility) %>% mutate(mean_over = mean(as.numeric(perc_overcap)))
 s$facility<-with(s, reorder(facility, as.numeric(perc_overcap)))
-s$mean_over<-paste(round(s$mean_over,2),"%")
+s$mean_over<-paste("m = ",round(s$mean_over,2),"%")
 ggplot(data=s, aes(x=toupper(facility),y=as.numeric(perc_overcap)))+
-  geom_text(size=1, aes(label=mean_over, y=70), check_overlap = TRUE)+
+  geom_text(size=3, aes(label=mean_over, y=70), check_overlap = TRUE)+
   geom_hline(yintercept = 0, linetype="dashed",color="darkgrey")+
-  geom_bar(stat="identity", alpha=0.6, width=0.5, aes(fill=factor(under)),position = position_dodge())+
+  guides(fill=guide_legend(reverse=TRUE,title = element_blank()))+
+  scale_fill_discrete(labels=c("over","under"))+
+  geom_bar(stat="identity", alpha=0.6, width=0.5, aes(fill=factor(under)),position = position_identity())+
   coord_flip()+
   xlab("Facility")+
   ylab("% over maximum rated capacity")+
