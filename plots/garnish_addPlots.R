@@ -289,11 +289,11 @@ ggplot(data=s, aes(x=toupper(facility),y=as.numeric(perc_overcap)))+
 
 # zoomed in % over capacity
 
-# filter(facility!="north central" & facility!="shirley") %>%
 
 s<-ds %>%
   select(filename, facility, total_pop, capacity, perc_overcap, new_date, year, facility_type, name) %>%
   filter(facility_type=="prison") %>%
+  filter(facility!="north central") %>%
   filter(year>2017)
 s$under<-ifelse(s$perc_overcap<0,1,0)
 s<-s %>% group_by(facility) %>% mutate(mean_over = mean(as.numeric(perc_overcap)))
@@ -312,3 +312,11 @@ ggplot(data=s, aes(x=toupper(facility),y=as.numeric(perc_overcap)))+
        subtitle = "Department of Public Health inspections of MDOC Facilities",
        caption = "jkant@bu.edu")
 
+# scatter over capacity
+
+
+s<-ds %>%
+  select(facility, total_pop, capacity, perc_overcap, new_date, year, facility_type, total_violations) %>%
+  filter(facility_type=="prison") %>%
+ggplot(s, aes(x=new_date,y=perc_overcap))+
+  geom_point(na.rm=TRUE)
