@@ -94,7 +94,7 @@ s<-ds %>%
   xlab("Date of report")+
   labs(title="MCI Framingham Total and Repeat Violations",
        subtitle = "Source: DPH Inspections, 2015-2020",
-       caption = "jkant@bu.edu", fill="Type")+
+       caption = "deeperthanwater.org", fill="Type")+
   scale_fill_discrete(name="Type", labels=c("Total","Repeat"))+
   scale_x_date(date_labels = "%m/%y", breaks = s$new_date)
 
@@ -146,8 +146,8 @@ ds %>%
   geom_point(mapping=aes(x=new_date,y=total_violations,color=facility))+
   ylab("number of violations")+
   xlab("year of inspection")+
-  labs(title="Total health inspection violations, Massachusetts Jails",
-       subtitle = "Massachusetts DPH Reports, 2010-2020",caption="jkant@bu.edu")+
+  labs(title="Sample of total health inspection violations, Massachusetts Jails",
+       subtitle = "Massachusetts DPH Reports, 2015-2020",caption="deeperthanwater.org")+
   scale_color_brewer(palette = "Spectral")
 
 # jails v. prisons 2015-present
@@ -184,7 +184,7 @@ ggplot(ds,total_pop~total_violations)
 
 # relationship of violations to prison population, linear regression
 
-plot(lm(ds$total_pop~ds$total_violations+ds$facility))
+lm(ds$total_pop~ds$total_violations+ds$facility)
 
 png(filename = '~/../Desktop/violations.png', 
     width= 800, height=500)
@@ -320,3 +320,33 @@ s<-ds %>%
   filter(facility_type=="prison") %>%
 ggplot(s, aes(x=new_date,y=perc_overcap))+
   geom_point(na.rm=TRUE)
+
+
+
+
+
+s<-ds %>%
+  select(year, new_date, filename, total_violations, repeat_string, facility, total_pop, over_cap, perc_overcap) %>%
+  filter(facility=="mci framingham") %>%
+  filter(year>2014) %>%
+  melt(melted, id.vars = c("new_date","facility","total_pop"), 
+       measure.vars =c("total_violations","repeat_string"),
+       variable.name = "newORold") %>%
+  arrange(new_date)
+s$new_date<-as.Date(s$new_date)
+
+ggplot(data=s,aes(x=new_date,y=value,fill=newORold))+
+  geom_bar(stat="identity",position = "dodge")+
+  geom_point(mapping=aes(x=new_date,y=as.numeric(total_pop)))+
+  geom_text(mapping=aes(x=new_date,y=as.numeric(total_pop),label=total_pop),
+            colour="blue",nudge_y = 20,size=2.5)+
+  geom_line(mapping=aes(x=new_date,y=as.numeric(total_pop)),colour="gray")+
+  scale_color_discrete(name="violations",labels=c("population"),)+
+  ylab("number of violations")+
+  xlab("Date of report")+
+  labs(title="MCI Framingham Total and Repeat Violations",
+       subtitle = "Source: DPH Inspections, 2015-2020",
+       caption = "jkant@bu.edu", fill="Type")+
+  scale_fill_discrete(name="Type", labels=c("Total","Repeat"))+
+  scale_x_date(date_labels = "%m/%y", breaks = s$new_date)
+
