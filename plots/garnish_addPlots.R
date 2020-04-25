@@ -99,7 +99,9 @@ s<-ds %>%
   scale_x_date(date_labels = "%m/%y", breaks = s$new_date)
 
 
-# box and whisker plot comparing 4 facilities
+# box and whisker plot comparing 4 facilities, 
+# framingham, norfolk, cedar junction and concord
+# color
 
 png(filename = '~/../Desktop/violations.png', 
     width= 800, height=500)
@@ -155,19 +157,24 @@ ds %>%
 png(filename = '~/../Desktop/violations.png', 
     width= 800, height=500)
 
-ds %>% 
+s<-ds %>% 
   select(new_date, year, total_violations, facility, facility_type) %>%
   filter(facility_type=="jail" | facility_type=="prison") %>%
   filter(year>2014) %>%
   filter(facility!="") %>%
-  arrange(year) %>%
-  ggplot(aes(x=new_date,y=total_violations))+
-  geom_point(mapping=aes(x=new_date,y=total_violations,color=facility_type))+
-  ylab("number of violations")+
-  xlab("year of inspection")+
-  labs(title="Health inspection violations, Massachusetts Jails and Prisons",
-       subtitle = "Massachusetts DPH Reports, 2015-2020",caption="jkant@bu.edu",colour="Facility Type")+
-  scale_color_brewer(palette = "Set1")
+  arrange(year)
+
+        # simple plot
+
+        ggplot(data=s,aes(x=new_date,y=total_violations))+
+          geom_point(mapping=aes(x=new_date,y=total_violations,color=facility_type))+
+          ylab("number of violations")+
+          xlab("year of inspection")+
+          labs(title="Health inspection violations, Massachusetts Jails and Prisons",
+               subtitle = "Massachusetts DPH Reports, 2015-2020",caption="jkant@bu.edu",
+               colour="Facility Type")+
+          scale_color_brewer(palette = "Set1")
+
 
 dev.off()
 
@@ -201,6 +208,8 @@ ds %>%
 
 dev.off()
 
+# histogram
+# population vs. max capacity
 
 s<-ds %>%
   select(year, new_date, total_violations, repeat_string, facility, facility_type, filename, total_pop, capacity, over_cap) %>%
@@ -266,8 +275,6 @@ ds %>%
   scale_color_brewer(palette = "Set1")+
   facet_grid(.~facility_type)
 
-
-
 # percent over capacity
 
 s<-ds %>%
@@ -288,7 +295,6 @@ ggplot(data=s, aes(x=toupper(facility),y=as.numeric(perc_overcap)))+
 
 
 # zoomed in % over capacity
-
 
 s<-ds %>%
   select(filename, facility, total_pop, capacity, perc_overcap, new_date, year, facility_type, name) %>%
@@ -312,18 +318,8 @@ ggplot(data=s, aes(x=toupper(facility),y=as.numeric(perc_overcap)))+
        subtitle = "Department of Public Health inspections of MDOC Facilities",
        caption = "jkant@bu.edu")
 
-# scatter over capacity
-
-
-s<-ds %>%
-  select(facility, total_pop, capacity, perc_overcap, new_date, year, facility_type, total_violations) %>%
-  filter(facility_type=="prison") %>%
-ggplot(s, aes(x=new_date,y=perc_overcap))+
-  geom_point(na.rm=TRUE)
-
-
-
-
+# total violations and repeat violations histogram
+# with line and point overlap of population at time
 
 s<-ds %>%
   select(year, new_date, filename, total_violations, repeat_string, facility, total_pop, over_cap, perc_overcap) %>%

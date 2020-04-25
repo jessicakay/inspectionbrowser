@@ -1,0 +1,51 @@
+---
+title: "Plots"
+author: "jesskay"
+date: "4/25/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(stringr)
+library(ggplot2)
+library(dplyr)
+library(lubridate)
+library(reshape2)
+```
+
+## R Markdown
+
+The following plot shows a vertical histogram of the percentage over capacity per facility, with an axis down the middle demarcating zero.
+
+
+```{r plot}
+
+
+s<-ds %>%
+  select(year, new_date, filename, total_violations, repeat_string, facility, total_pop, over_cap, perc_overcap) %>%
+  filter(facility=="mci framingham") %>%
+  filter(year>2014) %>%
+  melt(melted, id.vars = c("new_date","facility","total_pop"), 
+       measure.vars =c("total_violations","repeat_string"),
+       variable.name = "newORold") %>%
+  arrange(new_date)
+s$new_date<-as.Date(s$new_date)
+
+ggplot(data=s,aes(x=new_date,y=value,fill=newORold))+
+  geom_bar(stat="identity",position = "dodge")+
+  geom_point(mapping=aes(x=new_date,y=as.numeric(total_pop)))+
+  geom_text(mapping=aes(x=new_date,y=as.numeric(total_pop),label=total_pop),
+            colour="blue",nudge_y = 20,size=2.5)+
+  geom_line(mapping=aes(x=new_date,y=as.numeric(total_pop)),colour="gray")+
+  scale_color_discrete(name="violations",labels=c("population"),)+
+  ylab("number of violations")+
+  xlab("Date of report")+
+  labs(title="MCI Framingham Total and Repeat Violations",
+       subtitle = "Source: DPH Inspections, 2015-2020",
+       caption = "jkant@bu.edu", fill="Type")+
+  scale_fill_discrete(name="Type", labels=c("Total","Repeat"))+
+  scale_x_date
+
+```
+
