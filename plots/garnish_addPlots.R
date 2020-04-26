@@ -81,13 +81,14 @@ lineChart<-function(){
 s<-ds %>%
   select(year, new_date, total_violations, repeat_string, facility) %>%
   filter(facility=="mci framingham") %>%
-  filter(year>2014) %>%
+  filter(year>2013) %>%
   melt(melted, id.vars = c("new_date","facility"), 
        measure.vars =c("total_violations","repeat_string"),
        variable.name = "newORold") %>%
   arrange(new_date)
   s$new_date<-as.Date(s$new_date)
-  ggplot(data=s,aes(x=new_date,y=value,fill=newORold))+
+
+ggplot(data=s,aes(x=new_date,y=value,fill=newORold))+
   geom_bar(stat="identity",position = "stack")+
   scale_color_discrete(name="violations")+
   ylab("number of violations")+
@@ -97,6 +98,8 @@ s<-ds %>%
        caption = "deeperthanwater.org", fill="Type")+
   scale_fill_discrete(name="Type", labels=c("Total","Repeat"))+
   scale_x_date(date_labels = "%m/%y", breaks = s$new_date)
+
+
 
 
 # box and whisker plot comparing 4 facilities, 
@@ -226,6 +229,32 @@ ggplot(data=s,aes(x=toupper(facility),y=value,fill=newORold))+
   labs(title="Population vs. Max Capacity",
        subtitle = "Source: DPH Inspections, 2019",
        caption = "deeperthwnater.org", fill="Type")
+
+####### experimental cleveland plot
+
+s<-ds %>%
+  select(year, new_date, total_violations, repeat_string, facility, facility_type, total_pop, capacity, over_cap, filename) %>%
+  filter(facility_type=="prison") %>%
+  filter(year>2017 & year<2020) %>%
+  melt(melted, id.vars = c("facility", "filename", "year","capacity"), 
+       measure.vars =c("total_pop","capacity"),
+       variable.name = "newORold")
+
+
+s<-s %>% arrange_all(desc(capacity))
+
+ggplot(data=s,aes(x=toupper(facility),y=value,fill=newORold))+
+  geom_point(stat="identity",aes(color=newORold), show.legend = FALSE)+
+  geom_line(aes(group=facility), show.legend = FALSE)+
+  ylab("# of people in facility")+
+  xlab("Facility")+
+  scale_fill_discrete(name="Type", labels=c("Total","Capacity"))+
+  labs(title="Population vs. Max Capacity",
+       subtitle = "Source: DPH Inspections, 2019",
+       caption = "deeperthanwater.org", fill="Type")+
+  coord_flip()+
+  facet_grid(year~.)
+
 
 ######
 
