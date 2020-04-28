@@ -235,15 +235,20 @@ ggplot(data=s,aes(x=toupper(facility),y=value,fill=newORold))+
 s<-ds %>%
   select(year, new_date, total_violations, repeat_string, facility, facility_type, total_pop, capacity, over_cap, filename) %>%
   filter(facility_type=="prison") %>%
-  filter(year>2017 & year<2020) %>%
-  melt(melted, id.vars = c("facility", "filename", "year","capacity"), 
+  filter(year>2015 & year<2020) %>%
+  filter(facility!="north central") %>%
+  melt(melted, id.vars = c("facility", "filename", "year","total_pop"), 
        measure.vars =c("total_pop","capacity"),
        variable.name = "newORold")
 
+s<-s %>% group_by(facility) %>% arrange(total_pop)
 
-s<-s %>% arrange_all(desc(capacity))
+s$facility<-as.character(s$facility)
+s$facility<-factor(s$facility,levels=unique(reorder(s$facility,s$total_pop)))
 
-ggplot(data=s,aes(x=toupper(facility),y=value,fill=newORold))+
+levels(s$facility)
+
+ggplot(data=s,aes(x=fct_inorder(toupper(facility)),y=value,fill=newORold))+
   geom_point(stat="identity",aes(color=newORold), show.legend = FALSE)+
   geom_line(aes(group=facility), show.legend = FALSE)+
   ylab("# of people in facility")+
@@ -251,7 +256,7 @@ ggplot(data=s,aes(x=toupper(facility),y=value,fill=newORold))+
   scale_fill_discrete(name="Type", labels=c("Total","Capacity"))+
   labs(title="Population vs. Max Capacity",
        subtitle = "Source: DPH Inspections, 2019",
-       caption = "deeperthanwater.org", fill="Type")+
+       caption = "jkant@bu.edu", fill="Type")+
   coord_flip()+
   facet_grid(year~.)
 
