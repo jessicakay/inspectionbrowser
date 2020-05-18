@@ -17,4 +17,7 @@ df<- ds %>%
   select(facility, new_date, year, capacity, total_pop, total_violations, perc_overcap) %>% 
   arrange(facility)
 
-summary(glm(data=df, total_pop~total_violations+factor(facility)+capacity,family = "poisson"))
+x<-glm(data=df, total_pop~total_violations+
+      factor(facility)+capacity, 
+      family = "poisson")
+summary(x)
