@@ -95,6 +95,16 @@ ds$new_date<-as.Date(ds$new_date,"%m/%d/%Y")
 
 sub<-ds %>% select(name, date, new_date, facility, facility_type,cmr_total,fc_total, total_violations, repeat_string, report_date)
 
+
+
+# Bristol County data needs cleaning, see below
+
+sub<-ds %>% select(filename, new_date, facility, 
+                   facility_type,cmr_total,fc_total, total_violations, 
+                   repeat_string, ast_cnt, year, total_pop) %>%
+            filter(facility=="bristol county") 
+
+
 # data dictionary 
 
           ds$ventilation<-ds$`451.14`
