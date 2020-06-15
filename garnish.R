@@ -44,7 +44,8 @@ fList<-c("mci norfolk","souza","worcester county", "norfolk county", "essex coun
            "souza","south middlesex correction","mci concord", "plymouth county", "old colony",
            "pondville","middlesex county","shirley","mci framingham", "mci plymouth",
            "berkshire county","barnstable county","suffolk county", "boston pre-release",
-           "bridge water", "bridgewater","bristol county jail","hampden county", "boston pre release","ash street")
+           "bridge water", "bridgewater","bristol county jail","hampden county", "boston pre release",
+           "ash street","hampshire county")
 ds$facility<-""
 ds$report_date<-""
 ds$facility_type<-""
@@ -83,7 +84,7 @@ for(n in ds$name){
 ds$facility_type<-""
 
 ds$facility_type[which(str_detect(ds$name,"jail|lockup|house of correction|county")==TRUE)]<-"jail"
-ds$facility_type[which(str_detect(ds$name,"mci|MCI|m.c.i.")==TRUE)]<-"prison"
+ds$facility_type[which(str_detect(ds$name,"mci|MCI|m.c.i.|correctional center|ncci")==TRUE)]<-"prison"
 ds$facility_type[which(str_detect(ds$name,"substance|treatment|rehab|rehabilitation")==TRUE)]<-"substance"
 ds$facility_type[which(str_detect(ds$name,"i\\.c\\.e|ice facility")==TRUE)]<-"ice"
 
