@@ -27,8 +27,6 @@ ds<-read.csv("~/../Do~/../Downloads/south bay/sheet.csv",
   ds[length(ds)+1]<-toMove
   
 # following code extracts dates from ds$name column and identifies facility 
-# indexValues() is for resetting matrices/index variables
-
   
 ds$cmr_total<-rowSums(ds[which(str_detect(colnames(ds),"[:digit:]+\\.[:digit:]+"))],na.rm = TRUE)
 ds$fc_total<-rowSums(ds[which(str_detect(colnames(ds),"[:digit:]+\\-[:digit:]+.[:digit:]+"))],na.rm = TRUE)

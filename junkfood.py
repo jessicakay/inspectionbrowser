@@ -3,8 +3,6 @@ import csv
 import re
 import docx
 import pandas
-import numpy
-import textract
 
 def gettext(report_files,sel):
     global logCSV, alltext
