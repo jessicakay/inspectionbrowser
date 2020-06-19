@@ -81,9 +81,11 @@ for(n in ds$name){
 # identify facility type
 ds$facility_type<-""
 
-ds$facility_type[which(str_detect(ds$name,"jail|lockup|house of correction|county")==TRUE)]<-"jail"
-ds$facility_type[which(str_detect(ds$name,"mci|MCI|m.c.i.|correctional center|ncci")==TRUE)]<-"prison"
-ds$facility_type[which(str_detect(ds$name,"substance|treatment|rehab|rehabilitation")==TRUE)]<-"substance"
+# note: ash street, NCCI, etc, are spelled out to detect specific instances that don't follow convention
+
+ds$facility_type[which(str_detect(ds$name,"jail|lockup|house of correction|county|ash street")==TRUE)]<-"jail"
+ds$facility_type[which(str_detect(ds$name,"mci|MCI|m.c.i.|correctional center|correctional institute|ncci")==TRUE)]<-"prison"
+ds$facility_type[which(str_detect(ds$name,"substance|treatment|rehab|rehabilitation|alternative")==TRUE)]<-"substance"
 ds$facility_type[which(str_detect(ds$name,"i\\.c\\.e|ice facility")==TRUE)]<-"ice"
 
 # import created_date data from junkfood.py into useable data
