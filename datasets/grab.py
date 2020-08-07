@@ -2,19 +2,14 @@
 
 import os
 import re
+import requests
 
 home = os.path.expanduser('~')
 dtop=''.join([home,"/Desktop/"])
 
-def grabber():
-	reportlist = input("url list location:")
-	if "https://" in reportlist:
-		print("url")
-	elif ".txt" in reportlist:
-		listread(reportlist)
-
 def listread(reportList):
 	engine = input("use wget [w] or curl [c]:")
+	os.chdir(''.join([home,"/Downloads/"]))
 	with open(reportList, 'r') as lst:
 		reports=lst.readlines()
 	for i in reports:
@@ -31,4 +26,13 @@ def listread(reportList):
 		if d == 'q':
 			quit()
 
-grabber()
+def urlgrab(reportlist):
+	print("loading...")
+
+
+reportlist = input("url list location:")
+if "http://" in reportlist or "https://" in reportlist:
+	urlgrab(reportlist)
+
+elif ".txt" in reportlist:
+	listread(reportlist)
