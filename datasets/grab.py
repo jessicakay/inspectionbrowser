@@ -8,8 +8,14 @@ dtop=''.join([home,"/Desktop/"])
 
 def grabber():
 	reportlist = input("url list location:")
+	if "https://" in reportlist:
+		print("url")
+	elif ".txt" in reportlist:
+		listread(reportlist)
+
+def listread(reportList):
 	engine = input("use wget [w] or curl [c]:")
-	with open(reportlist, 'r') as lst:
+	with open(reportList, 'r') as lst:
 		reports=lst.readlines()
 	for i in reports:
 		i=i.rstrip()
@@ -24,3 +30,5 @@ def grabber():
 		d=input("next?")
 		if d == 'q':
 			quit()
+
+grabber()
