@@ -4,12 +4,14 @@ import os
 import re
 import requests
 import tabula
+import csv
 
 home = os.path.expanduser('~')
 dtop=''.join([home,"/Desktop/"])
+os.chdir(''.join([home, "/Downloads/"]))
+
 
 def listread(reportList):
-	os.chdir(''.join([home, "/Downloads/"]))
 	engine = input("use wget [w] or curl [c]:")
 	with open(reportList, 'r') as lst:
 		reports=lst.readlines()
@@ -28,12 +30,12 @@ def listread(reportList):
 			quit()
 
 def urlgrab(reportlist):
-	os.chdir(''.join([home, "/Downloads/"]))
 	targetfile=requests.get(reportlist)
 
 def pdfgrab(reportlist):
-	targfile=tabula.read_pdf(reportlist,stream=True,pages="all")
+	targfile=tabula.read_pdf(reportlist, encoding='utf-8',stream=True,pages="all")
 	print(len(targfile)," tables read into memory")
+	targfile.to_csv('out.csv',encoding='utf-0')
 
 reportlist = input("url list location:")
 if "http://" in reportlist or "https://" in reportlist:
