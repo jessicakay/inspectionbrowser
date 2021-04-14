@@ -44,18 +44,51 @@
         
         collection<-as.data.frame(NULL)
         local_files <-list.files()
-        curr_target <-local_files[1]
         n<-1
         for(l in local_files){
           curr_layout <- tabulizer::extract_tables(local_files[n])
           tab_1 <- as.data.frame(curr_layout[1])                # table 1 is the summary
           names(tab_1)<-as.vector(tab_1[1,])                    # rename headers
-          tab_1[-c(1,6),] -> tab_1
-          collection<-rbind(collection,tab_1)
+          tab_1[-c(1,6),] ->> tab_1
+          collection<<-rbind(collection,tab_1)
+          n<-n+1
         }
         
+        collection %>%
+          filter(CELL_HOUSING=="2 or more other people") %>%
+          lm(collection$PERCENT~factor(collection$`REPORT DATE`)) %>% summary() 
         
-        # pdftools version 
+        collection %>% as.data.frame() -> collection
+        gsub("%","",collection$PERCENT) %>% as.numeric() -> collection$PERCENT
+        
+        coll_mean <- tapply(collection$PERCENT,collection$CELL_HOUSING,mean)
+        collection %>%
+          ggplot(aes(group=CELL_HOUSING)) +
+          geom_line(aes(y=PERCENT,x=reorder(`REPORT DATE`,desc(`REPORT DATE`))),
+                    linetype="dashed",col="grey")+
+          geom_point(aes(y=PERCENT,x=reorder(`REPORT DATE`,desc(`REPORT DATE`))),shape=3)+
+          facet_wrap(CELL_HOUSING~.,scales = "free")+
+          theme(axis.text.x = element_text(angle = 90))+
+          theme(axis.title.x = element_blank())+
+          labs(title = "Cell occupancy in the MA DOC",subtitle = "November 2020 - January 2021",
+               caption = "github.com/jesskay")
+
+        collection %>%
+          group_by(CELL_HOUSING) %>%
+          summarise(m=mean(PERCENT)) -> cell_m
+        collection %>%
+          group_by(CELL_HOUSING) %>%
+          summarise(med=median(PERCENT)) -> cell_med
+        collection %>%
+          group_by(CELL_HOUSING) %>%
+          summarise(max=max(PERCENT)) -> cell_max
+        cbind(cell_m,cell_med,cell_max) -> cell_tab
+        cbind(">1 person",cell_tab$m[1]+cell_tab$m[4],
+              ">1 person",cell_tab$med[1]+cell_tab$med[4],
+              ">1 person",cell_tab$max[1]+cell_tab$max[4]) %>% unlist() %>% as.vector() -> cx
+        rbind(cell_tab,as.vector("-~-~-~"),cx)
+        
+                # pdftools version 
         
         targ <- pdftools::pdf_text(u) 
         as.data.frame(pdf_data(u)[3])$text %>% table()
