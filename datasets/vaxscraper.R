@@ -96,27 +96,42 @@
           mutate(mean_percent=mean(PERCENT)) %>%
           ungroup() -> collection
         
-        # collection_backup<-collection
+         collection_backup<-collection
+         
         # collection<-collection_backup
 
+        
+        over1<-collection$PERCENT[which(collection$CELL_HOUSING=="With 1 other person")]+
+        collection$PERCENT[which(collection$CELL_HOUSING=="2 or more other people")] %>% as.data.frame()
+        names(over1)[1]<-"plusone"  
+       
+        collection %>% group_by(REPORT_DATE) %>%
+          summarize(plus1=PERCENT[which(CELL_HOUSING=="2 or more other people")]+
+                      PERCENT[which(CELL_HOUSING=="With 1 other person")]) %>%
+          ggplot(aes(x=reorder(REPORT_DATE,REPORT_DATE),y=plus1,label=paste(plus1,"%")))+
+          geom_point(aes(y=plus1))+
+          geom_text(vjust=-3,size=3)+
+          ylab(label = "% >1")+
+          ylim(... = c(45,55))+
+          xlab(label=element_blank())+
+          theme(axis.text.x = element_blank(),axis.ticks.x = element_blank())->plot_a
+        
         collection %>%  
-        ggplot(aes(group=CELL_HOUSING)) +
+          ggplot(aes(group=CELL_HOUSING)) +
           geom_line(aes(y=PERCENT,x=reorder(REPORT_DATE,REPORT_DATE)),
                     linetype="dashed",colour="grey")+
-          geom_hline(aes(yintercept=mean_percent))+
+          geom_hline(aes(yintercept=mean_percent),color="red",linetype="dotted")+
           geom_point(aes(y=PERCENT,x=reorder(REPORT_DATE,desc(REPORT_DATE))),shape=3)+
           facet_wrap(CELL_HOUSING~.,scales = "free")+
           theme(axis.text.x = element_text(angle = 90))+
           theme(axis.title.x = element_blank())+
-                  labs(title = "Cell occupancy in the MA DOC",subtitle = "November 2020 - January 2021",
-               caption = "github.com/jesskay") -> plot_a
-       
-        collection %>%  
-        ggplot(aes(group=CELL_HOUSING)) +
-          geom_smooth(mapping = aes(x=REPORT_DATE,y=PERCENT),method = "lm")+
           labs(title = "Cell occupancy in the MA DOC",subtitle = "November 2020 - January 2021",
-               caption = "github.com/jesskay")+
-          facet_wrap(.~CELL_HOUSING) -> plot_b
+               caption = "github.com/jesskay")->plot_b
+        
+        gridExtra::grid.arrange(plot_a, plot_b,
+        nrow=2,heights=c(1,3))
+       
+        # calculations
         
         collection %>%
           group_by(CELL_HOUSING) %>%
