@@ -32,14 +32,16 @@
         read_html("https://www.mass.gov/lists/doc-covid-19-institution-cell-housing-reports/") %>%
           html_elements(".ma__download-link__file-link") %>% html_attr("href") -> file_list
 
-        dir.create("cell_reports")
+        # dir.create("cell_reports") # run first time
+        
         setwd("cell_reports/")
+        
         for(f in file_list){
           file<-gsub(":","",gsub("/","",f))
           file<-substr(file,18,nchar(file))
           curl::curl_download(url  = f,destfile = paste(file,".pdf",sep=""))
         }
-        
+          
     # mine downloaded reports... 
         
         collection<-as.data.frame(NULL)
@@ -53,13 +55,11 @@
           collection<<-rbind(collection,tab_1)
           n<-n+1
         }
-        
-        collection %>%
-          filter(CELL_HOUSING=="2 or more other people") %>%
-          lm(collection$PERCENT~factor(collection$`REPORT DATE`)) %>% summary() 
-        
+
         collection %>% as.data.frame() -> collection
         gsub("%","",collection$PERCENT) %>% as.numeric() -> collection$PERCENT
+        
+        # plot data
         
         coll_mean <- tapply(collection$PERCENT,collection$CELL_HOUSING,mean)
         collection %>%
