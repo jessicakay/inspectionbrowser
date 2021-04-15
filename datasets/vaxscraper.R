@@ -12,11 +12,12 @@
   
   library(dplyr)
   library(tabulizer)
-  library(rJava)
   library(rvest)
+
   library(pdftools)
   library(httr)
-
+  library(rJava)
+  
   Sys.setenv(JAVA_HOME="C:/Program Files/Java/jre1.8.0_281/bin/")
   
   
@@ -44,6 +45,8 @@
           
     # mine downloaded reports... 
         
+        setwd("~/../Desktop/cell_reports")
+
         collection<-as.data.frame(NULL)
         local_files <-list.files()
         n<-1
@@ -55,9 +58,32 @@
           collection<<-rbind(collection,tab_1)
           n<-n+1
         }
+        
+        n<-1
+        for(l in local_files){
+          curr_layout <- tabulizer::extract_tables(local_files[n])
+          tab_1 <- as.data.frame(curr_layout[1])                # table 1 is the summary
+          names(tab_1)<-as.vector(tab_1[1,])                    # rename headers
+          tab_1[-c(1,6),] ->> tab_1
+          collection<<-rbind(collection,tab_1)
+          n<-n+1
+        }
+        
 
         collection %>% as.data.frame() -> collection
         gsub("%","",collection$PERCENT) %>% as.numeric() -> collection$PERCENT
+        
+        # transform table 1 data
+        
+        collection %>% tidyr::pivot_wider(names_from = c(CELL_HOUSING), 
+                                          values_from = c(PERCENT,COUNT)) %>% write.csv(file="data.csv")
+
+        
+        # table 2 (prototype)
+        
+        tabulizer::extract_tables(local_files[1])[2] -> coll_tab2
+        coll_tab2 %>% tidyr::pivot_wider(names_from = c(CELL_HOUSING), 
+                                         values_from = c(PERCENT,COUNT)) %>% write.csv(file="data.csv")
         
         # plot data
         
