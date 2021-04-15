@@ -13,7 +13,8 @@
   library(dplyr)
   library(tabulizer)
   library(rvest)
-
+  library(ggplot2)
+  
   library(pdftools)
   library(httr)
   library(rJava)
@@ -88,17 +89,35 @@
         # plot data
         
         coll_mean <- tapply(collection$PERCENT,collection$CELL_HOUSING,mean)
+
         collection %>%
-          ggplot(aes(group=CELL_HOUSING)) +
-          geom_line(aes(y=PERCENT,x=reorder(`REPORT DATE`,desc(`REPORT DATE`))),
-                    linetype="dashed",col="grey")+
-          geom_point(aes(y=PERCENT,x=reorder(`REPORT DATE`,desc(`REPORT DATE`))),shape=3)+
+          mutate(REPORT_DATE=lubridate::as_date(`REPORT DATE`,format="%m/%d/%Y")) %>%
+          group_by(CELL_HOUSING) %>%
+          mutate(mean_percent=mean(PERCENT)) %>%
+          ungroup() -> collection
+        
+        # collection_backup<-collection
+        # collection<-collection_backup
+
+        collection %>%  
+        ggplot(aes(group=CELL_HOUSING)) +
+          geom_line(aes(y=PERCENT,x=reorder(REPORT_DATE,REPORT_DATE)),
+                    linetype="dashed",colour="grey")+
+          geom_hline(aes(yintercept=mean_percent))+
+          geom_point(aes(y=PERCENT,x=reorder(REPORT_DATE,desc(REPORT_DATE))),shape=3)+
           facet_wrap(CELL_HOUSING~.,scales = "free")+
           theme(axis.text.x = element_text(angle = 90))+
           theme(axis.title.x = element_blank())+
+                  labs(title = "Cell occupancy in the MA DOC",subtitle = "November 2020 - January 2021",
+               caption = "github.com/jesskay") -> plot_a
+       
+        collection %>%  
+        ggplot(aes(group=CELL_HOUSING)) +
+          geom_smooth(mapping = aes(x=REPORT_DATE,y=PERCENT),method = "lm")+
           labs(title = "Cell occupancy in the MA DOC",subtitle = "November 2020 - January 2021",
-               caption = "github.com/jesskay")
-
+               caption = "github.com/jesskay")+
+          facet_wrap(.~CELL_HOUSING) -> plot_b
+        
         collection %>%
           group_by(CELL_HOUSING) %>%
           summarise(m=mean(PERCENT)) -> cell_m
@@ -113,6 +132,8 @@
               ">1 person",cell_tab$med[1]+cell_tab$med[4],
               ">1 person",cell_tab$max[1]+cell_tab$max[4]) %>% unlist() %>% as.vector() -> cx
         rbind(cell_tab,as.vector("-~-~-~"),cx)
+        
+        abline(lm(data = collection, PERCENT~REPORT_DATE+factor(CELL_HOUSING)))
         
                 # pdftools version 
         
