@@ -99,12 +99,11 @@
   
         collection <- c_alldata
         
-        collection %>% group_by(INSTITUTION,`CELL HOUSING`) %>%
+        c_alldata %>% group_by(INSTITUTION,CELL_HOUSING) %>%
           mutate(COUNT=as.numeric(COUNT)) %>% summarize(MEAN_COUNT=mean(COUNT)) %>%
           filter(`CELL HOUSING`!="") %>% filter(INSTITUTION!="OUT-OF-DOC Transfer") %>% 
           tidyr::pivot_wider(names_from = c(`CELL HOUSING`), 
                                                            values_from = c(MEAN_COUNT))  %>% View()
-          
           
         # transform table 1 data
         
@@ -132,7 +131,6 @@
          
         # collection<-collection_backup
 
-        
         over1<-collection$PERCENT[which(collection$CELL_HOUSING=="With 1 other person")]+
         collection$PERCENT[which(collection$CELL_HOUSING=="2 or more other people")] %>% as.data.frame()
         names(over1)[1]<-"plusone"  
@@ -165,6 +163,8 @@
         nrow=2,heights=c(1,3))
        
         # calculations
+        
+        collection %>% mutate(PERCENT=as.numeric(substr(PERCENT,0,nchar(PERCENT)-1))) -> collection
         
         collection %>%
           group_by(CELL_HOUSING) %>%
