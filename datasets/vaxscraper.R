@@ -15,10 +15,10 @@
   library(tabulizer)
   library(rvest)
   library(ggplot2)
+  library(rJava)
   
   # library(pdftools)
   # library(httr)
-  # library(rJava)
   
   Sys.setenv(JAVA_HOME="C:/Program Files/Java/jre1.8.0_281/bin/")
   
