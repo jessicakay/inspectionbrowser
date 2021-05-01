@@ -84,13 +84,15 @@
         
         # in progress (grabs table 2)
         
+        collection<-as.data.frame(NULL)
+        local_files <-list.files()
         n<-1
         for(l in local_files){
           curr_layout <- tabulizer::extract_tables(local_files[n])[2] # specifies table 2
           tab_1 <- as.data.frame(curr_layout[1])   
           names(tab_1)<-as.vector(tab_1[1,])                          # rename headers
           tab_1[-c(1,6),] ->> tab_1
-          collection<<-rbind(collection,tab_1)
+          collection<<-bind_rows(collection,tab_1,by="report_date")
           n<-n+1
         }
 
@@ -113,9 +115,9 @@
         
         # table 2 (prototype)
         
-        tabulizer::extract_tables(local_files[1])[2] -> coll_tab2
-        coll_tab2 %>% tidyr::pivot_wider(names_from = c(CELL_HOUSING), 
-                                         values_from = c(PERCENT,COUNT)) %>% write.csv(file="data.csv")
+        cell_occ<-read.csv("/Users/jessa/OneDrive/Documents/GitHub/misc/inspectionbrowser/datasets/cell_occ_full.csv")
+        
+        collection %>% tidyr::pivot_wider(names_from = c(`CELL HOUSING`), values_from = c(COUNT,INSTITUTION)) %>% View()
         
         # plot data
         
