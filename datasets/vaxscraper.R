@@ -110,16 +110,27 @@
         # transform table 1 data
         
         collection %>% tidyr::pivot_wider(names_from = c(CELL_HOUSING), 
-                                          values_from = c(PERCENT,COUNT)) %>% write.csv(file="data.csv")
+                                          values_from = c(PERCENT,COUNT),
+                                          id_cols = c(INSTITUTION)
+                                          ) %>% write.csv(file="data.csv")
 
         
         # table 2 (prototype)
         
         cell_occ<-read.csv("/Users/jessa/OneDrive/Documents/GitHub/misc/inspectionbrowser/datasets/cell_occ_full.csv")
         
-        collection %>% tidyr::pivot_wider(names_from = c(`CELL HOUSING`), values_from = c(COUNT,INSTITUTION)) %>% View()
+        cell_occ %>% tidyr::pivot_wider(names_from = c(CELL.HOUSING), values_from = c(COUNT),id_cols=c(INSTITUTION,REPORT.DATE)) 
         
-        # plot data
+        cell_occ %>%
+          filter(!INSTITUTION=="OUT-OF-DOC Transfer") %>%
+          filter(!CELL.HOUSING=="") %>%
+          dplyr::rename(cnt=COUNT) %>%
+          ggplot(aes(cnt))+
+          geom_bar(stat = "identity")+
+          theme(axis.text.x = element_text(angle = 90))+
+          facet_grid(.~INSTITUTION)
+        
+            # plot data
         
         coll_mean <- tapply(collection$PERCENT,collection$CELL_HOUSING,mean)
 
