@@ -43,6 +43,11 @@ dataset  -> backup_ds
 
 dataset$repeat_string <- as.numeric(dataset$repeat_string)
 
+statCol<-function(stat){
+  paste(round(mean(stat,na.rm = T),2), " (", min(stat,na.rm = T),",",max(stat,na.rm = T),")")
+}
+
+  
 dataset %>%
   filter(facility_type=="prison") %>%
   group_by(facility) %>%
@@ -58,6 +63,64 @@ dataset %>%
   mutate(yrs_available = paste(yr_min," - ",yr_max,sep="")) %>%
   select(-c(total_violations, year, repeat_string, cmr_total, fc_total)) %>% 
   select(-c(yr_min,yr_max)) -> table1
+
+kbl(table1)
+
+
+statCol2<-function(stat){paste("(", min(stat,na.rm = T),",",max(stat,na.rm = T),")")}
+
+mn<-function(x){round(mean(x,na.rm=T),2)}
+
+dataset %>%
+  filter(facility_type=="prison") %>%
+  group_by(facility) %>%
+  select(fc_total, repeat_string, facility, cmr_total, total_violations,year) %>%
+  mutate(yr_min=min(year,na.rm=T)) %>%
+  mutate(yr_max=max(year,na.rm=T)) %>%
+  mutate(yrs_available = paste(yr_min," - ",yr_max,sep="")) %>%
+  select(-c(total_violations, year, repeat_string, cmr_total, fc_total)) %>% 
+  select(-c(yr_min,yr_max)) %>%
+  distinct() -> t1
+
+
+dataset %>%
+  filter(facility_type=="prison") %>%
+  group_by(facility) %>%
+  select(facility,year) %>%
+  mutate(yr_min=min(year,na.rm=T)) %>%
+  mutate(yr_max=max(year,na.rm=T)) %>%
+  mutate(yrs_available = paste(yr_min," - ",yr_max,sep="")) %>%
+  select(-c(yr_min,yr_max)) %>%
+  summarise(n=n()) -> t1
+  
+         # note: the use of the filter above excludes prisons where type tag didn't apply see below: 
+      
+        dataset %>% select (facility, facility_type) %>% arrange(order_by=facility)
+
+dataset %>%
+  filter(facility_type=="prison") %>%
+  group_by(facility) %>%
+  select(fc_total, repeat_string, facility, cmr_total, total_violations,year) %>%
+  mutate(rp=statCol2(repeat_string)) %>%
+  mutate(repeat_max=mn(repeat_string)) %>%
+  mutate(cm=statCol2(cmr_total)) %>%
+  mutate(cmr_tot_max=mn(cmr_total)) %>%
+  mutate(fc=statCol2(fc_total)) %>%
+  mutate(fc_tot_max=mn(fc_total)) %>% 
+  mutate(yr_min=min(year,na.rm=T)) %>%
+  mutate(yr_max=max(year,na.rm=T)) %>%
+  mutate(yrs_available = paste(yr_min," - ",yr_max,sep="")) %>%
+  select(-c(total_violations, year, repeat_string, cmr_total, fc_total)) %>% 
+  select(-c(yr_min,yr_max)) %>%
+  distinct() -> t1
+
+  knitr::kable(t1,align = rep('r',150))
+
+  kbl(t1,align='r')
+  
+
+
+
 
 library(kableExtra)
 
