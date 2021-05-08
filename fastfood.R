@@ -83,6 +83,24 @@ dataset %>%
   distinct() -> t1
 
 
+#  dataset %>%
+#    filter(facility_type=="prison") %>%
+#    group_by(facility) %>%
+#    select(facility,year) %>%
+#    mutate(yr_min=min(year,na.rm=T)) %>%
+#    mutate(yr_max=max(year,na.rm=T)) %>%
+#    mutate(yrs_available = paste(yr_min," - ",yr_max,sep="")) %>%
+#    select(-c(yr_min,yr_max)) %>%
+#    summarise(n=n()) -> t1
+  
+         # note: the use of the filter above excludes prisons where type tag didn't apply see below: 
+      
+        dataset %>% select(facility, facility_type) %>% arrange(order_by=facility)
+        
+        # this, when piped into a filter will capture the entries missed by the tagging function
+
+        dataset$facility[dataset$facility_type=="prison"] %>% unique() -> madoc
+
 dataset %>%
   filter(facility_type=="prison") %>%
   group_by(facility) %>%
@@ -92,13 +110,9 @@ dataset %>%
   mutate(yrs_available = paste(yr_min," - ",yr_max,sep="")) %>%
   select(-c(yr_min,yr_max)) %>%
   summarise(n=n()) -> t1
-  
-         # note: the use of the filter above excludes prisons where type tag didn't apply see below: 
-      
-        dataset %>% select (facility, facility_type) %>% arrange(order_by=facility)
-
+        
 dataset %>%
-  filter(facility_type=="prison") %>%
+  filter(facility %in% madoc) %>%
   group_by(facility) %>%
   select(fc_total, repeat_string, facility, cmr_total, total_violations,year) %>%
   mutate(rp=statCol2(repeat_string)) %>%
