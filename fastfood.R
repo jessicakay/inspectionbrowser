@@ -102,7 +102,7 @@ dataset %>%
         dataset$facility[dataset$facility_type=="prison"] %>% unique() -> madoc
 
 dataset %>%
-  filter(facility_type=="prison") %>%
+  filter(facility %in% madoc) %>%
   group_by(facility) %>%
   select(facility,year) %>%
   mutate(yr_min=min(year,na.rm=T)) %>%
@@ -126,7 +126,7 @@ dataset %>%
   mutate(yrs_available = paste(yr_min," - ",yr_max,sep="")) %>%
   select(-c(total_violations, year, repeat_string, cmr_total, fc_total)) %>% 
   select(-c(yr_min,yr_max)) %>%
-  distinct() -> t1
+  distinct() -> t2
 
   knitr::kable(t1,align = rep('r',150))
 
@@ -134,6 +134,34 @@ dataset %>%
   
 
 
+  
+  dataset %>%
+    filter(facility %in% madoc) %>%
+    group_by(facility) %>%
+    select(facility,year) %>%
+    summarise(numberdocs=n()) %>%
+    mutate(yr_min=min(year,na.rm=T)) %>%
+    mutate(yr_max=max(year,na.rm=T)) %>%
+    mutate(yrs_available = paste(yr_min," - ",yr_max,sep="")) %>%
+    select(-c(yr_min,yr_max))  -> t1
+  
+  dataset %>%
+    filter(facility %in% madoc) %>%
+    group_by(facility) %>%
+    select(fc_total, repeat_string, facility, cmr_total, total_violations,year) %>%
+    mutate(rp=statCol2(repeat_string)) %>%
+    mutate(repeat_max=mn(repeat_string)) %>%
+    mutate(cm=statCol2(cmr_total)) %>%
+    mutate(cmr_tot_max=mn(cmr_total)) %>%
+    mutate(fc=statCol2(fc_total)) %>%
+    mutate(fc_tot_max=mn(fc_total)) %>% 
+    mutate(yr_min=min(year,na.rm=T)) %>%
+    mutate(yr_max=max(year,na.rm=T)) %>%
+    mutate(yrs_available = paste(yr_min," - ",yr_max,sep="")) %>%
+    select(-c(total_violations, year, repeat_string, cmr_total, fc_total)) %>% 
+    select(-c(yr_min,yr_max)) %>%
+    distinct() -> t2
+  
 
 
 library(kableExtra)
