@@ -13,7 +13,7 @@ library(ggplot2)
 library(dplyr)
 library(lubridate)
 
-ds<-read.csv("~/../Do~/../Downloads/south bay/sheet.csv",
+ds<-read.csv("/Users/jessa/Downloads/old computer/Downloads/south bay/sheet.csv",
                 stringsAsFactors = FALSE, 
                 header = TRUE, 
                 check.names = FALSE)
