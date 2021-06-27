@@ -14,3 +14,4 @@ ds$over_cap<-ifelse(!is.na(ds$capacity)==TRUE,ds$total_pop-ds$capacity,"")
 
 View(ds %>% select(facility, total_pop, capacity,max_capacity))
 
+

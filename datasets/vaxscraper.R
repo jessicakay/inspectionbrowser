@@ -26,10 +26,6 @@
 
     # cell occupancy reports
     
-        print("loading...\n")
-        read_html("https://www.mass.gov/lists/doc-covid-19-institution-cell-housing-reports/") %>%
-          html_nodes(".ma__download-link__file-spec") %>% html_text()
-  
         read_html("https://www.mass.gov/lists/doc-covid-19-institution-cell-housing-reports/") %>%
           html_elements(".ma__download-link__file-link") %>% html_attr("href") -> file_list
 
