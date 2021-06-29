@@ -102,7 +102,25 @@
           filter(`CELL HOUSING`!="") %>% filter(INSTITUTION!="OUT-OF-DOC Transfer") %>% 
           tidyr::pivot_wider(names_from = c(`CELL HOUSING`), 
                                                            values_from = c(MEAN_COUNT))  %>% View()
-          
+        
+        # Wyatt Detention Center - Case 1:20-mc-00004-JJM 
+        
+        
+        setwd("~/wyatt/")
+        
+        collection<-as.data.frame(NULL)
+        local_files <-list.files()
+        
+        n<-1
+        for(l in local_files){}
+          curr_layout <- tabulizer::extract_tables(local_files[n])
+          tab_1 <- as.data.frame(curr_layout[1])                # table 1 is the summary
+          names(tab_1)<-as.vector(tab_1[1,])                    # rename headers
+          tab_1[-c(1,6),] ->> tab_1
+          collection<<-rbind(collection,tab_1)
+          n<-n+1
+        }
+        
         # transform table 1 data
         
         collection %>% tidyr::pivot_wider(names_from = c(CELL_HOUSING), 
