@@ -1,4 +1,5 @@
 #
+# 2021 prison data project
 # github.com/jessicakay
 #
 
@@ -72,13 +73,3 @@ runScan<-function(gridVals=c(7,12,13,20)){
   runScan()                              # run with default perameters
   runScan(gridVals = c(1,6,9))           # extract numeric data from array positions 1, 6, and 9
 
-# scratchpad, comparing ocr_data to ocr_tex
-
-as.data.frame(pdf_ocr_data("050420report.pdf",pages = 1)) -> x
-as.data.frame(pdf_ocr_data("june8th.pdf",pages = 1)) -> y
-as.data.frame(pdf_ocr_data("wdc2.pdf",pages = 1)) -> z
-
-
-x[,1][45]
-y[,1][45]
-z[,1][45]
