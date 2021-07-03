@@ -45,10 +45,13 @@ readOCR <- function(target,gridVals,magnification){
   targ<<-str_split(trg, pattern="\n") %>% as.array()
   as.array(str_extract(targ[[1]][1],"[0-9]+/[0-9]+/[0-9]+")) -> newDate
   as.array(str_extract(targ[[1]][setTarg],"[0-9]+")) -> newObs
+  as.array(str_extract(targ[[1]],"[0-9]+%")) ->> newCap                       # capacity stored in percent 
+  newCap <<- cbind(newCap[which(str_detect(newCap,"%"))],newDate)
   newObs <<- append(newDate,newObs)
   endT<-Sys.time()
   flush.console()
   writeLines(paste(round(eval(endT-startT),2)," secs to process\n"))
+  writeLines(paste(" -> ",newCap,"\n"))
 }
 
 runScan<-function(gridVals=c(7,12,13,20),magnification=1){
@@ -58,6 +61,7 @@ runScan<-function(gridVals=c(7,12,13,20),magnification=1){
       net<-as.data.frame(NULL)
       benchStart<-Sys.time()
       scan_log<<-as.vector(NULL)
+      cap_log<<-c("capacity","date")
       }
     flush.console()
     if(grepl(".pdf",l)){
@@ -79,3 +83,7 @@ runScan<-function(gridVals=c(7,12,13,20),magnification=1){
   runScan(gridVals = c(1,6,9))                  # extract numeric data from array positions 1, 6, and 9
 
   runScan(gridVals = gridVals, magnification = 2)        # double DPI to 800
+
+  
+  append(cap_log,newCap) ->> cap_log
+  
