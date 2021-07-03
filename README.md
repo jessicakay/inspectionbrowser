@@ -1,5 +1,7 @@
 # inspectionbrowser
 jkant@bu.edu
+
+Prison Data Project
  
 Python and R (tidy) framework for collecting, mining, sorting and analyzing 
 public health data on MA prisons, jails and detention centers.
@@ -14,6 +16,10 @@ inspectionbrowser is made up of two components, Junkfood (document analysis, dat
  * R: ggplot2, dplyr, stringr, lubridate, reshape2
  
  * Bash & Python: scraper
+
+2021 UPDATES:
+
+ * added ability to batch scan image-only PDFs into useable datasets (see wyatt.R) uses the tesseract engine via pdftools
  
 A special thanks is also due to Tabula [ https://github.com/tabulapdf ] for making baseline data so easy to extract from DOC records. <3
  
