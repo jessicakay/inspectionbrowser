@@ -17,9 +17,11 @@ inspectionbrowser is made up of two components, Junkfood (document analysis, dat
  
  * Bash & Python: scraper
 
+
 2021 UPDATES:
 
  * added ability to batch scan image-only PDFs into useable datasets (see wyatt.R) uses the tesseract engine via pdftools
+ 
  
 A special thanks is also due to Tabula [ https://github.com/tabulapdf ] for making baseline data so easy to extract from DOC records. <3
  
