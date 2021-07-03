@@ -1,5 +1,5 @@
-#
 # 2021 prison data project
+# jessica kant
 # github.com/jessicakay
 #
 
@@ -11,7 +11,7 @@ library(pdftools)
 library(dplyr)
 library(stringr)
 
-setwd("/Users/jessa/Downloads/wyatt/")
+setwd("~/wyatt/")
 
 local_files <-list.files()
 
@@ -35,12 +35,14 @@ for(l in local_files){if(n<2){net<-as.data.frame(NULL)}
   n<-n+1
 }
 
-# added benchmarking
+# added benchmarking, optional 2x DPI for better character recognition
 
 
-readOCR <- function(target,gridVals){
+readOCR <- function(target,gridVals,argh){
   startT<-Sys.time()
-  pdftools::pdf_ocr_text(target, pages = 1) ->> trg
+  if(argh==1){ pdftools::pdf_ocr_text(target, pages = 1) ->> trg }
+  if(argh==2) {pdftools::pdf_ocr_text(target, pages = 1, dpi = 800) ->> trg}
+  if(argh==3) {pdftools::pdf_ocr_text(target, pages = 1, dpi = 1200) ->> trg}
   targ<<-str_split(trg, pattern="\n") %>% as.array()
   as.array(str_extract(targ[[1]][1],"[0-9]+/[0-9]+/[0-9]+")) -> newDate
   as.array(str_extract(targ[[1]][setTarg],"[0-9]+")) -> newObs
@@ -50,26 +52,31 @@ readOCR <- function(target,gridVals){
   writeLines(paste(round(eval(endT-startT),2)," secs to process\n"))
 }
 
-runScan<-function(gridVals=c(7,12,13,20)){
+runScan<-function(gridVals=c(7,12,13,20),argh=1){
   n<-1
   for(l in local_files){
     if(n<2){
       net<-as.data.frame(NULL)
-      benchStart<-Sys.time()}
+      benchStart<-Sys.time()
+      scan_log<<-as.vector(NULL)
+      }
     flush.console()
     if(grepl(".pdf",l)){
       writeLines(paste("processing file ",n,": ",l,"...\n"))
-      readOCR(l,gridVals)
+      readOCR(l,gridVals,argh)
       rbind(net,newObs) ->> net}
     if(n==length(local_files)){
       writeLines(paste(round(eval((Sys.time()-benchStart)),2)," mins runtime\n."))
     }
+    append(scan_log,targ) ->> scan_log 
     n<-n+1
   }
 }
 
+
   # run the scan with default, and custom peramaeters
 
-  runScan()                              # run with default perameters
-  runScan(gridVals = c(1,6,9))           # extract numeric data from array positions 1, 6, and 9
+  runScan()                                     # run with default perameters
+  runScan(gridVals = c(1,6,9))                  # extract numeric data from array positions 1, 6, and 9
 
+  runScan(gridVals = gridVals, argh = 2)        # double DPI to 800
