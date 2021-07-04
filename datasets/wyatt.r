@@ -40,11 +40,11 @@ for(l in local_files){if(n<2){net<-as.data.frame(NULL)}
 
 readOCR <- function(target,gridVals,magnification){
   startT<-Sys.time()
-  if(magnification==0){ pdftools::pdf_ocr_text(target, pages = 1) ->> trg }
+  if(magnification==0){ suppressMessages(pdftools::pdf_ocr_text(target, pages = 1)) ->> trg }
   if(magnification==1){ 
     pdf_convert(target, pages = 1, dpi = 800, format = "tiff")
     ocr(paste(substr(target,1,nchar(target)-4),"_1.tiff",sep=""),                      # mag option 1 uses TIFF
-        engine = tesseract("eng"))->> trg                                              # at 800 DPI
+        engine = tesseract("eng")) %>% suppressMessages() ->> trg                                              # at 800 DPI
     }
   if(magnification>=2){ 
     pdftools::pdf_ocr_text(target, pages = 1, dpi = 400 * magnification) ->> trg       # mag option 2+ uses
@@ -57,8 +57,8 @@ readOCR <- function(target,gridVals,magnification){
   newObs <<- append(newDate,newObs)
   endT<-Sys.time()
   flush.console()
-  writeLines(paste(round(eval(endT-startT),2)," secs to process\n"))
-  writeLines(paste(" -> ",newCap,"\n"))
+  writeLines(paste("\n",round(eval(endT-startT),2)," secs to process\n"))
+  writeLines(paste(" -> ", newCap[2],": facility capacity = ", newCap[1],"\n"))
 }
 
 runScan<-function(gridVals=c(7,12,13,20),magnification=1){
@@ -86,8 +86,8 @@ runScan<-function(gridVals=c(7,12,13,20),magnification=1){
 
   # run the scan with default, and custom peramaeters
 
-  runScan()                                     # run with default perameters
-  runScan(gridVals = c(1,6,9))                  # extract numeric data from array positions 1, 6, and 9
+  runScan()                                              # run with default perameters
+  runScan(gridVals = c(1,6,9))                           # extract numeric data from array positions 1, 6, and 9
 
   runScan(gridVals = gridVals, magnification = 2)        # double DPI to 800
 
