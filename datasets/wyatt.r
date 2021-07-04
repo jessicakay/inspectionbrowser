@@ -40,12 +40,19 @@ for(l in local_files){if(n<2){net<-as.data.frame(NULL)}
 
 readOCR <- function(target,gridVals,magnification){
   startT<-Sys.time()
-  if(magnification==1){ pdftools::pdf_ocr_text(target, pages = 1) ->> trg }
-  if(magnification>=2){ pdftools::pdf_ocr_text(target, pages = 1, dpi = 400 * magnification) ->> trg }
+  if(magnification==0){ pdftools::pdf_ocr_text(target, pages = 1) ->> trg }
+  if(magnification==1){ 
+    pdf_convert(target, pages = 1, dpi = 800, format = "tiff")
+    ocr(paste(substr(target,1,nchar(target)-4),"_1.tiff",sep=""),                      # mag option 1 uses TIFF
+        engine = tesseract("eng"))->> trg                                              # at 800 DPI
+    }
+  if(magnification>=2){ 
+    pdftools::pdf_ocr_text(target, pages = 1, dpi = 400 * magnification) ->> trg       # mag option 2+ uses
+    }                                                                                  # png, dpi = 400 * mag
   targ<<-str_split(trg, pattern="\n") %>% as.array()
   as.array(str_extract(targ[[1]][1],"[0-9]+/[0-9]+/[0-9]+")) -> newDate
   as.array(str_extract(targ[[1]][setTarg],"[0-9]+")) -> newObs
-  as.array(str_extract(targ[[1]],"[0-9]+%")) ->> newCap                       # capacity stored in percent 
+  as.array(str_extract(targ[[1]],"[0-9]+%")) ->> newCap                                # capacity stored in percent 
   newCap <<- cbind(newCap[which(str_detect(newCap,"%"))],newDate)
   newObs <<- append(newDate,newObs)
   endT<-Sys.time()
