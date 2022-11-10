@@ -92,6 +92,7 @@ ds$facility_type[which(str_detect(ds$name,"i\\.c\\.e|ice facility")==TRUE)]<-"ic
 
 ds$new_date<-ds$date
 ds$new_date<-as.Date(ds$new_date,"%m/%d/%Y")
+ds$year<-year(ds$new_date)
 
 sub<-ds %>% select(name, date, new_date, facility, facility_type,cmr_total,fc_total, total_violations, repeat_string, report_date)
 

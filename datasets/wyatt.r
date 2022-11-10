@@ -14,7 +14,7 @@ library(dplyr)
 library(stringr)
 library(magick)
 
-setwd("~/wyatt/")
+setwd("/Users/jessa/Downloads/wyatt/")
 
 local_files <-list.files()
 
@@ -27,6 +27,7 @@ readOCR <- function(target){
   as.array(str_extract(targ[[1]][c(7,12,13,20)],"[0-9]+")) -> newObs          # vector values are 
   newObs <<- append(newDate,newObs)                                           # positions in array
 }
+
 n<-1
 for(l in local_files){if(n<2){net<-as.data.frame(NULL)}
   if(grepl(".pdf",l)){
@@ -111,4 +112,6 @@ runScan<-function(gridVals=c(7,12,13,20),magnification=1){
   # mag option 0 uses default pdftools settings: png, 72dpi
   # mag option 1 uses TIFF at at 800 DPI, then passes through imagemagick to convert image to "pure" black and white
   # mag option 2+ uses png @ dpi = 400 * mag
+  
+  
   

@@ -57,7 +57,7 @@
         file<-gsub(":","",gsub("/","",f))
         file<-substr(file,12,nchar(file))
         curl::curl_download(url  = f,destfile = paste(file,".pdf",sep=""))
-        Sys.sleep(5)
+        Sys.sleep(sample(1:5))
         progress(n,progress.bar = TRUE)
         n<-n+1
       }
@@ -77,7 +77,7 @@
           collection<<-rbind(collection,tab_1)
           n<-n+1
         }
-        
+
         # in progress (grabs table 2)
         
         collection<-as.data.frame(NULL)
@@ -91,17 +91,35 @@
           collection<<-bind_rows(collection,tab_1,by="report_date")
           n<-n+1
         }
-
+        
         collection %>% as.data.frame() %>% 
           filter(`REPORT DATE`!="") -> c_alldata                     # filter out 'total' lines before converting to wide
-  
+        
         collection <- c_alldata
         
         c_alldata %>% group_by(INSTITUTION,CELL_HOUSING) %>%
           mutate(COUNT=as.numeric(COUNT)) %>% summarize(MEAN_COUNT=mean(COUNT)) %>%
           filter(`CELL HOUSING`!="") %>% filter(INSTITUTION!="OUT-OF-DOC Transfer") %>% 
           tidyr::pivot_wider(names_from = c(`CELL HOUSING`), 
-                                                           values_from = c(MEAN_COUNT))  %>% View()
+                             values_from = c(MEAN_COUNT))  %>% View()
+        
+        # vax 
+        
+        collection<-as.data.frame(NULL)
+        local_files <-list.files()
+        n<-1
+        for(l in local_files){
+          curr_layout <- tabulizer::extract_tables(local_files[n])
+          if(grepl("Vaccines",u)==TRUE){
+            tab_1 <- as.data.frame(as.array(curr_layout[[1]][21,]))
+            writeLines(print(tab_1))
+            writeLines(print(l))
+            names(tab_1)<-as.vector(tab_1[1,])                  
+            tab_1[-c(1,6),] ->> tab_1
+            collection<<-rbind(collection,tab_1)
+            }
+          n<-n+1
+        }
         
         # Wyatt Detention Center - Case 1:20-mc-00004-JJM 
         
@@ -112,7 +130,7 @@
         local_files <-list.files()
         
         n<-1
-        for(l in local_files){}
+        for(l in local_files){
           curr_layout <- tabulizer::extract_tables(local_files[n])
           tab_1 <- as.data.frame(curr_layout[1])                # table 1 is the summary
           names(tab_1)<-as.vector(tab_1[1,])                    # rename headers
